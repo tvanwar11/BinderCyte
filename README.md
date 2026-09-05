@@ -78,4 +78,8 @@ single user on a trusted local machine. Do not expose either port to a network.
 
 ## License
 
-Not yet licensed. Until a LICENSE file is added, all rights are reserved.
+MIT — see [LICENSE](LICENSE).
+
+## Citation
+
+See [CITATION.cff](CITATION.cff).

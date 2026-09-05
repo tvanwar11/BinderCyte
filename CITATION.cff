@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: BinderCyte
+message: If you use this software, please cite it as below.
+type: software
+authors:
+  - family-names: van Warmerdam
+    given-names: Travis C.
+    affiliation: The Pennsylvania State University
+abstract: >-
+  Two local graphical tools for the front half of a de novo protein binder
+  design campaign. The first loads a target structure, builds a per-residue
+  inventory with chemistry classes and pairwise hotspot distances, and exports
+  a cropped, renumbered target with a validated hotspot string. The second
+  configures the design campaign, generates a manifest and a SLURM array
+  script, and transfers and submits the job over SSH.
+version: 1.0.0
+date-released: "2026-09-05"
+repository-code: "https://github.com/tvanwar11/BinderCyte"
+license: MIT
+# DOI: add once Zenodo has archived the v1.0.0 release, as
+#   identifiers:
+#     - type: doi
+#       value: 10.5281/zenodo.XXXXXXX
+# Until then the citation resolves only to a mutable GitHub URL.
