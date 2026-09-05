@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local run artifacts
+*.log
+campaigns/
+output/
+*.pdb
+!examples/*.pdb
+
+# Never commit credentials or cluster identity
+*.pem
+*.key
+id_rsa*
+.env
+config.local.json
+
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

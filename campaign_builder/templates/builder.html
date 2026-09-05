@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backbone Builder</title>
+    <link rel="stylesheet" href="/static/style.css?v=4">
+</head>
+<body>
+    <header id="topbar">
+        <div class="brand">
+            <span class="brand-mark">BB</span>
+            <div>
+                <div class="brand-title">Backbone Builder</div>
+                <div class="brand-sub">RFdiffusion pipeline</div>
+            </div>
+        </div>
+        <div class="conn-pill">
+            <span id="conn-dot" class="dot gray"></span>
+            <span id="conn-label">Disconnected</span>
+        </div>
+    </header>
+
+    <div id="layout">
+        <aside id="sidebar">
+            <section class="card">
+                <div class="card-head"><span class="step-badge">1</span> Connection</div>
+                <div class="card-body">
+                    <label class="field">Host
+                        <input type="text" id="hostname" value="login.hpc.example.edu">
+                    </label>
+                    <label class="field">Username
+                        <input type="text" id="username" value="">
+                    </label>
+                    <label class="field">Password
+                        <input type="password" id="password" placeholder="cluster password">
+                    </label>
+                    <button class="btn btn-primary full" id="btn-connect" onclick="doConnect()">Connect</button>
+                    <div id="conn-msg" class="hint"></div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-head"><span class="step-badge">2</span> Campaign</div>
+                <div class="card-body">
+                    <label class="field">Campaign name
+                        <input type="text" id="campaign-name" placeholder="barrel_la6_50aa">
+                    </label>
+                    <label class="field">Target PDB (local path)
+                        <div class="field-row">
+                            <input type="text" id="target-pdb" placeholder="C:\path\to\target.pdb">
+                            <button class="btn small" type="button" onclick="browsePdb()">Browse</button>
+                        </div>
+                    </label>
+                    <div class="field-row">
+                        <label class="field">Chain
+                            <input type="text" id="target-chain" value="A">
+                        </label>
+                        <label class="field">Start
+                            <input type="number" id="target-start" value="1">
+                        </label>
+                        <label class="field">End
+                            <input type="number" id="target-end" value="100">
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-head">
+                    <span class="step-badge">3</span> Design cells
+                    <button class="btn btn-ghost small right" onclick="addCell()">+ Add</button>
+                </div>
+                <div class="card-body">
+                    <table id="cells-table">
+                        <thead>
+                            <tr><th>Name</th><th>Length</th><th>Hotspots</th><th>N</th><th></th></tr>
+                        </thead>
+                        <tbody id="cells-body"></tbody>
+                    </table>
+                    <div id="total-line" class="hint"></div>
+                </div>
+            </section>
+
+            <section class="card collapsed" id="slurm-section">
+                <div class="card-head clickable" onclick="toggleSection('slurm-section')">
+                    <span class="step-badge">4</span> SLURM config
+                    <span class="arrow right">&#9656;</span>
+                </div>
+                <div class="card-body section-body">
+                    <div class="field-row">
+                        <label class="field">Partition
+                            <input type="text" id="partition" value="sla-prio">
+                        </label>
+                        <label class="field">Memory
+                            <input type="text" id="memory" value="8G">
+                        </label>
+                    </div>
+                    <label class="field">Account
+                        <input type="text" id="account" value="your_slurm_account">
+                    </label>
+                    <label class="field">Time limit
+                        <input type="text" id="time-limit" value="00:30:00">
+                    </label>
+                    <label class="field">RFdiffusion root
+                        <input type="text" id="rfd-root" value="/path/to/RFdiffusion">
+                    </label>
+                    <div class="field-row">
+                        <label class="field">Noise CA
+                            <input type="number" id="noise-ca" value="0" step="0.1">
+                        </label>
+                        <label class="field">Noise frame
+                            <input type="number" id="noise-frame" value="0" step="0.1">
+                        </label>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <main id="content">
+            <section class="card grow">
+                <div class="card-head">
+                    Preview
+                    <div class="tabs right">
+                        <button class="tab active" data-tab="manifest" onclick="showTab('manifest')">manifest.csv</button>
+                        <button class="tab" data-tab="slurm" onclick="showTab('slurm')">SLURM script</button>
+                        <button class="tab" data-tab="transfer" onclick="showTab('transfer')">Transfer plan</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <pre id="pane-manifest" class="pane">Configure a campaign, then click Generate.</pre>
+                    <pre id="pane-slurm" class="pane hidden">The SLURM array script appears here after Generate.</pre>
+                    <pre id="pane-transfer" class="pane hidden">The file transfer plan appears here after Generate.</pre>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-head">Pipeline</div>
+                <div class="card-body">
+                    <div class="stepper">
+                        <div class="pstep" id="ps-generate"><span class="pnum">1</span> Generate</div>
+                        <div class="pline"></div>
+                        <div class="pstep" id="ps-transfer"><span class="pnum">2</span> Transfer</div>
+                        <div class="pline"></div>
+                        <div class="pstep" id="ps-submit"><span class="pnum">3</span> Submit</div>
+                    </div>
+                    <div class="pipeline-actions">
+                        <button class="btn btn-primary" id="btn-generate" onclick="doGenerate()">Generate</button>
+                        <button class="btn" id="btn-transfer" onclick="doTransfer()" disabled>Transfer</button>
+                        <button class="btn" id="btn-submit" onclick="doSubmit()" disabled>Submit</button>
+                    </div>
+                    <div id="conn-gate" class="gate-hint">Transfer &amp; Submit require an HPC connection (step 1).</div>
+                    <div id="pipeline-status" class="status-box">Ready.</div>
+                    <div id="job-info" class="hidden">
+                        <div class="job-row">
+                            <span>Job ID: <strong id="job-id"></strong></span>
+                            <span id="job-live" class="live-badge hidden"><span class="dot green"></span>live</span>
+                            <button class="btn btn-ghost small right" onclick="checkJobStatus()">Refresh</button>
+                        </div>
+                        <pre id="job-output" class="pane small"></pre>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/static/connection.js?v=4"></script>
+    <script src="/static/campaign.js?v=4"></script>
+    <script src="/static/jobmonitor.js?v=4"></script>
+    <script src="/static/pipeline.js?v=4"></script>
+    <script src="/static/persist.js?v=4"></script>
+</body>
+</html>

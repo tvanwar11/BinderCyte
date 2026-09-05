@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDB Builder</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://3dmol.org/build/3Dmol-min.js"></script>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h2>PDB Builder</h2>
+
+    <div id="upload-section">
+      <input type="file" id="pdb-file" accept=".pdb,.ent" style="display:none">
+      <div id="drop-zone" onclick="document.getElementById('pdb-file').click()">
+        Drop PDB here or click to open
+      </div>
+      <div id="loading" class="hidden">Computing inventory...</div>
+    </div>
+
+    <div id="chain-legend"></div>
+
+    <div id="view-controls" class="hidden">
+      <h3>View</h3>
+      <div class="btn-row">
+        <button data-view="cartoon" class="active" onclick="setView('cartoon')">Cartoon</button>
+        <button data-view="plddt" onclick="setView('plddt')">pLDDT</button>
+        <button data-view="orientation" onclick="setView('orientation')">Orientation</button>
+      </div>
+      <div class="btn-row">
+        <button data-view="surface-hydro" onclick="setView('surface-hydro')">Surf: Hydro</button>
+        <button data-view="surface-sasa" onclick="setView('surface-sasa')">Surf: SASA</button>
+        <button data-view="surface-chem" onclick="setView('surface-chem')">Surf: Chem</button>
+      </div>
+      <div class="btn-row">
+        <button data-view="sticks-filtered" onclick="setView('sticks-filtered')">Sticks (filt)</button>
+        <button data-view="composite" onclick="setView('composite')">Composite</button>
+        <button id="btn-labels" onclick="toggleLabels()">Labels</button>
+        <button id="btn-context" class="active" onclick="toggleContext()">Context</button>
+      </div>
+    </div>
+
+    <div id="filter-controls" class="hidden">
+      <h3>Filters</h3>
+      <label>Chain <select id="f-chain"><option value="">All</option></select></label>
+      <label>Chemistry
+        <select id="f-chem">
+          <option value="">All</option>
+          <option value="aromatic">Aromatic</option>
+          <option value="charged">Charged</option>
+          <option value="polar">Polar</option>
+          <option value="hydrophobic">Hydrophobic</option>
+        </select>
+      </label>
+      <label>Rel SASA &ge;
+        <input type="range" id="f-sasa" min="0" max="100" value="0">
+        <span id="sasa-val">0%</span>
+      </label>
+      <label>Orientation
+        <select id="f-orient">
+          <option value="">All</option>
+          <option value="outward">Outward</option>
+          <option value="inward">Inward</option>
+          <option value="lateral">Lateral</option>
+        </select>
+      </label>
+      <div class="btn-row">
+        <button onclick="applyFilters()">Apply</button>
+        <button onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+
+    <div id="focus-section" class="hidden">
+      <h3>Focus Region</h3>
+      <input type="text" id="focus-input" placeholder="A:240-310 or click chain">
+      <div class="btn-row">
+        <button onclick="setFocusFromInput()">Set Focus</button>
+        <button onclick="clearFocus()">Clear</button>
+      </div>
+    </div>
+
+    <div id="table-section" class="hidden">
+      <h3>Residues <span id="res-count"></span></h3>
+      <div id="table-wrap">
+        <table id="res-table">
+          <thead><tr>
+            <th data-col="star" class="col-star"></th>
+            <th data-col="chain">Ch</th>
+            <th data-col="resi">Resi</th>
+            <th data-col="resn">Resn</th>
+            <th data-col="chemistry">Class</th>
+            <th data-col="sasa_rel">SASA</th>
+            <th data-col="orientation">Orient</th>
+          </tr></thead>
+          <tbody id="res-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="hotspot-panel" class="hidden">
+      <h3>Hotspots <span id="hs-count">(0)</span></h3>
+      <div id="hs-list"></div>
+      <div id="hs-dists"></div>
+      <div class="btn-row">
+        <button onclick="promoteSelected()">Promote Selected</button>
+      </div>
+    </div>
+
+    <div id="export-section" class="hidden">
+      <h3>Export</h3>
+      <label>Name <input type="text" id="exp-name" value="target"></label>
+      <label>Binder length <input type="text" id="exp-binder" value="40-50"></label>
+      <label>Output dir <input type="text" id="exp-dir" value="."></label>
+      <div class="btn-row">
+        <button onclick="validateExport()">Validate</button>
+        <button onclick="doExport()">Export</button>
+      </div>
+      <div id="exp-status"></div>
+    </div>
+  </div>
+
+  <div id="viewer-container">
+    <div id="viewer"></div>
+  </div>
+</div>
+
+<script src="/static/viewer_core.js"></script>
+<script src="/static/residue_table.js"></script>
+<script src="/static/selection.js"></script>
+</body>
+</html>
